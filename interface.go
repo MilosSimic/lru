@@ -1,4 +1,4 @@
-package main
+package lru
 
 type Cache interface {
 	Get(key string) (interface{}, bool)

@@ -1,4 +1,4 @@
-package main
+package lru
 
 type EvictCallback func(key string, value interface{})
 
