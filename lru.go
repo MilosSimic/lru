@@ -38,7 +38,7 @@ func (lru *LRU) Get(key string) (interface{}, bool) {
 
 func (lru *LRU) Put(key string, value interface{}) (interface{}, bool) {
 	if val, ok := lru.cache[key]; ok {
-		val.Value.(*elem).value = value
+		val.Value.(*elem).Value = value
 
 		head := lru.evictlist.Front()
 		lru.evictlist.MoveBefore(val, head)
@@ -50,10 +50,10 @@ func (lru *LRU) Put(key string, value interface{}) (interface{}, bool) {
 		tail := lru.evictlist.Back()
 		lru.evictlist.Remove(tail)
 
-		delete(lru.cache, tail.Value.(*elem).key)
+		delete(lru.cache, tail.Value.(*elem).Key)
 
 		if lru.onEvict != nil {
-			lru.onEvict(tail.Value.(*elem).key, tail.Value.(*elem).value)
+			lru.onEvict(tail.Value.(*elem).Key, tail.Value.(*elem).Value)
 		}
 	}
 
@@ -65,7 +65,7 @@ func (lru *LRU) Put(key string, value interface{}) (interface{}, bool) {
 
 func (lru *LRU) Print() {
 	for e := lru.evictlist.Front(); e != nil; e = e.Next() {
-		fmt.Print(e.Value.(*elem).value, " ")
+		fmt.Print(e.Value.(*elem).Value, " ")
 	}
 	fmt.Println("")
 }
@@ -73,7 +73,7 @@ func (lru *LRU) Print() {
 func (lru *LRU) Clear() {
 	for k, v := range lru.cache {
 		if lru.onEvict != nil {
-			lru.onEvict(k, v.Value.(*elem).value)
+			lru.onEvict(k, v.Value.(*elem).Value)
 		}
 		delete(lru.cache, k)
 	}
@@ -95,7 +95,7 @@ func (lru *LRU) All() []*elem {
 
 func (lru *LRU) Init(data []*elem) bool {
 	for _, e := range data {
-		_, ok := lru.Put(e.key, e.value)
+		_, ok := lru.Put(e.Key, e.Value)
 		if !ok {
 			return false
 		}
@@ -105,7 +105,7 @@ func (lru *LRU) Init(data []*elem) bool {
 
 func (lru *LRU) Contains(key string) interface{} {
 	if val, ok := lru.cache[key]; ok {
-		return val.Value.(*elem).value
+		return val.Value.(*elem).Value
 	}
 	return nil
 }
