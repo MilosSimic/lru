@@ -84,6 +84,25 @@ func (lru *LRU) Len() int {
 	return lru.evictlist.Len()
 }
 
+func (lru *LRU) All() []*elem {
+	s := make([]*elem, lru.evictlist.Len())
+	for e := lru.evictlist.Front(); e != nil; e = e.Next() {
+		s = append(s, e.Value.(*elem))
+	}
+
+	return s
+}
+
+func (lru *LRU) Init(data []*elem) bool {
+	for _, e := range data {
+		_, ok := lru.Put(e.key, e.value)
+		if !ok {
+			return false
+		}
+	}
+	return true
+}
+
 func (lru *LRU) Contains(key string) interface{} {
 	if val, ok := lru.cache[key]; ok {
 		return val.Value.(*elem).value
