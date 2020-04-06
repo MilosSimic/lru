@@ -85,11 +85,10 @@ func (lru *LRU) Len() int {
 }
 
 func (lru *LRU) All() []*elem {
-	s := make([]*elem, lru.evictlist.Len())
+	s := []*elem{}
 	for e := lru.evictlist.Front(); e != nil; e = e.Next() {
 		s = append(s, e.Value.(*elem))
 	}
-
 	return s
 }
 
