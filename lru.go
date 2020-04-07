@@ -12,7 +12,7 @@ type LRU struct {
 	evictlist *list.List
 	cache     map[string]*list.Element
 	onEvict   EvictCallback
-	lock      *sync.Mutex
+	lock      sync.Mutex
 }
 
 func NewLRU(c int, f EvictCallback) (*LRU, error) {
