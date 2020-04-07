@@ -71,6 +71,22 @@ func (lru *LRU) Put(key string, value interface{}) (interface{}, bool) {
 	return newElem.Value, true
 }
 
+func (lru *LRU) Remove(key string) bool {
+	lru.lock.Lock()
+	defer lru.lock.Unlock()
+
+	if e, ok := lru.cache[key]; ok {
+		lru.evictlist.Remove(e)
+		delete(lru.cache, key)
+
+		if lru.onEvict != nil {
+			lru.onEvict(e.Value.(*Elem).Key, e.Value.(*Elem).Value)
+		}
+		return true
+	}
+	return false
+}
+
 func (lru *LRU) Print() {
 	lru.lock.Lock()
 	defer lru.lock.Unlock()
