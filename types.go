@@ -2,7 +2,7 @@ package lru
 
 type EvictCallback func(key string, value interface{})
 
-type elem struct {
+type Elem struct {
 	Key   string
 	Value interface{}
 }
