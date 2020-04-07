@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
+	"sync"
 )
 
 type LRU struct {
@@ -11,6 +12,7 @@ type LRU struct {
 	evictlist *list.List
 	cache     map[string]*list.Element
 	onEvict   EvictCallback
+	lock      *sync.Mutex
 }
 
 func NewLRU(c int, f EvictCallback) (*LRU, error) {
@@ -27,6 +29,9 @@ func NewLRU(c int, f EvictCallback) (*LRU, error) {
 }
 
 func (lru *LRU) Get(key string) (interface{}, bool) {
+	lru.lock.Lock()
+	defer lru.lock.Unlock()
+
 	if val, ok := lru.cache[key]; ok {
 		head := lru.evictlist.Front()
 		lru.evictlist.MoveBefore(val, head)
@@ -37,6 +42,9 @@ func (lru *LRU) Get(key string) (interface{}, bool) {
 }
 
 func (lru *LRU) Put(key string, value interface{}) (interface{}, bool) {
+	lru.lock.Lock()
+	defer lru.lock.Unlock()
+
 	if val, ok := lru.cache[key]; ok {
 		val.Value.(*Elem).Value = value
 
@@ -64,6 +72,9 @@ func (lru *LRU) Put(key string, value interface{}) (interface{}, bool) {
 }
 
 func (lru *LRU) Print() {
+	lru.lock.Lock()
+	defer lru.lock.Unlock()
+
 	for e := lru.evictlist.Front(); e != nil; e = e.Next() {
 		fmt.Print(e.Value.(*Elem).Value, " ")
 	}
@@ -71,6 +82,9 @@ func (lru *LRU) Print() {
 }
 
 func (lru *LRU) Clear() {
+	lru.lock.Lock()
+	defer lru.lock.Unlock()
+
 	for k, v := range lru.cache {
 		if lru.onEvict != nil {
 			lru.onEvict(k, v.Value.(*Elem).Value)
@@ -81,10 +95,16 @@ func (lru *LRU) Clear() {
 }
 
 func (lru *LRU) Len() int {
+	lru.lock.Lock()
+	defer lru.lock.Unlock()
+
 	return lru.evictlist.Len()
 }
 
 func (lru *LRU) All() []*Elem {
+	lru.lock.Lock()
+	defer lru.lock.Unlock()
+
 	s := []*Elem{}
 	for e := lru.evictlist.Front(); e != nil; e = e.Next() {
 		s = append(s, e.Value.(*Elem))
